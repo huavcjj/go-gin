@@ -2,7 +2,7 @@ package main
 
 import (
 	"go-gin/controllers"
-	"go-gin/models"
+	"go-gin/infra"
 	"go-gin/repositories"
 	"go-gin/services"
 	"net/http"
@@ -11,13 +11,8 @@ import (
 )
 
 func main() {
-	items := []models.Item{
-		{ID: 1, Name: "商品1", Price: 1000, Description: "説明1", SoldOut: false},
-		{ID: 2, Name: "商品2", Price: 2000, Description: "説明2", SoldOut: false},
-		{ID: 3, Name: "商品3", Price: 3000, Description: "説明3", SoldOut: true},
-	}
-
-	itemRepository := repositories.NewItemRepository(items)
+	db := infra.SetupDB()
+	itemRepository := repositories.NewItemRepository(db)
 	itemService := services.NewitemRepository(itemRepository)
 	itemController := controllers.NewItemController(itemService)
 
@@ -31,6 +26,7 @@ func main() {
 	r.GET("/items/:id", itemController.FindById)
 	r.POST("/items", itemController.Create)
 	r.PUT("/items/:id", itemController.Update)
+	r.DELETE("/items/:id", itemController.Delete)
 
 	r.Run("localhost:8080")
 }
