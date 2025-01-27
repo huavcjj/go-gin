@@ -1,11 +1,11 @@
-package main
+package migrations
 
 import (
 	"go-gin/infra"
 	"go-gin/models"
 )
 
-func main() {
+func init() {
 	infra.Initialize()
 	db := infra.SetupDB()
 
