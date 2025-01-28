@@ -8,10 +8,10 @@ import (
 
 type ItemRepository interface {
 	FindAll() (*[]models.Item, error)
-	FindById(id uint) (*models.Item, error)
+	FindById(itemId, userId uint) (*models.Item, error)
 	Create(item models.Item) (*models.Item, error)
 	Update(item models.Item) (*models.Item, error)
-	Delete(id uint) error
+	Delete(itemId, userId uint) error
 }
 
 type itemRepository struct {
@@ -29,9 +29,12 @@ func (r *itemRepository) FindAll() (*[]models.Item, error) {
 	return &items, nil
 }
 
-func (r *itemRepository) FindById(id uint) (*models.Item, error) {
+func (r *itemRepository) FindById(itemId, userId uint) (*models.Item, error) {
 	var item models.Item
-	if err := r.db.First(&item, id).Error; err != nil {
+	if err := r.db.First(&item, "id = ? AND user_id = ?", itemId, userId).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, err
+		}
 		return nil, err
 	}
 	return &item, nil
@@ -51,8 +54,8 @@ func (r *itemRepository) Update(item models.Item) (*models.Item, error) {
 	return &item, nil
 }
 
-func (r *itemRepository) Delete(id uint) error {
-	deleteItem, err := r.FindById(id)
+func (r *itemRepository) Delete(itemId, userId uint) error {
+	deleteItem, err := r.FindById(itemId, userId)
 	if err != nil {
 		return err
 	}

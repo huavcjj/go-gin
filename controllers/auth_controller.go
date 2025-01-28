@@ -49,5 +49,6 @@ func (c *authController) Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"token": token})
+	ctx.Header("Authorization", "Bearer "+*token)
+	ctx.Status(http.StatusOK)
 }
