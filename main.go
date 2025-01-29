@@ -9,11 +9,12 @@ import (
 
 	_ "go-gin/migrations"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-func main() {
-	db := infra.SetupDB()
+func setupRouter(db *gorm.DB) *gin.Engine {
 	itemRepository := repositories.NewItemRepository(db)
 	itemService := services.NewitemRepository(itemRepository)
 	itemController := controllers.NewItemController(itemService)
@@ -23,6 +24,7 @@ func main() {
 	authController := controllers.NewAuthController(authService)
 
 	r := gin.Default()
+	r.Use(cors.Default())
 	itemRouter := r.Group("/items")
 	itemRouterWithAuth := r.Group("/items", middlewares.AuthMiddleware(authService))
 	authRouter := r.Group("/auth")
@@ -35,5 +37,14 @@ func main() {
 
 	authRouter.POST("/signup", authController.Signup)
 	authRouter.POST("/login", authController.Login)
+
+	return r
+}
+
+func main() {
+	db := infra.SetupDB()
+
+	r := setupRouter(db)
+
 	r.Run("localhost:8080")
 }
